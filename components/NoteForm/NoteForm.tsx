@@ -5,12 +5,13 @@ import css from './NoteForm.module.css'
 import { createNote } from "@/lib/api";
 import { useNoteDraftStore } from "@/lib/store/noteStore";
 import { NewNoteData, NoteTag } from "@/types/note";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 
 const NoteForm = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { draft, setDraft, clearDraft } = useNoteDraftStore();
 	
@@ -27,13 +28,18 @@ const NoteForm = () => {
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: (newNote: NewNoteData) => createNote(newNote),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['notes'],
+      });
+    },
   })
 
-  const handleSubmit = async (FormData: FormData) => {
+  const handleSubmit = async (formData: FormData) => {
     const newNote: NewNoteData = {
-      title: FormData.get('title') as string,
-      content: FormData.get('content') as string,
-      tag: FormData.get('tag') as NoteTag,
+      title: formData.get('title') as string,
+      content: formData.get('content') as string,
+      tag: formData.get('tag') as NoteTag,
     }
 
     await mutateAsync(newNote)

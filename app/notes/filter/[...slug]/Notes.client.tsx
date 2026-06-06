@@ -29,7 +29,7 @@ const NotesClient = ({ tag }: NotesClientProps) => {
   const effectiveTag = tag === "all" ? undefined : tag;  
     
   const { data} = useQuery({
-    queryKey: ["notes", tag, page, search],
+    queryKey: ["notes", effectiveTag, page, search],
     queryFn: () =>
       fetchNotes({
         page: page,
